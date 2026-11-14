@@ -5,7 +5,7 @@ use crate::transition::EndpointDescriptor;
 use crate::UsbPeripheral;
 use core::cell::RefCell;
 use core::ops::{Deref, DerefMut};
-use critical_section::{CriticalSection, Mutex};
+use critical_section::Mutex;
 use usb_device::endpoint::EndpointAddress;
 use usb_device::{Result, UsbDirection, UsbError};
 
@@ -71,7 +71,7 @@ impl EndpointIn {
         }
     }
 
-    pub fn configure(&self, _cs: CriticalSection<'_>) {
+    pub fn configure(&self) {
         if self.index() == 0 {
             let mpsiz = match self.descriptor.max_packet_size {
                 8 => 0b11,
@@ -97,7 +97,7 @@ impl EndpointIn {
         }
     }
 
-    pub fn deconfigure(&self, _cs: CriticalSection<'_>) {
+    pub fn deconfigure(&self) {
         let regs = self.usb.endpoint_in(self.index() as usize);
 
         // deactivating endpoint
@@ -163,7 +163,7 @@ impl EndpointOut {
         }
     }
 
-    pub fn configure(&self, _cs: CriticalSection<'_>) {
+    pub fn configure(&self) {
         if self.index() == 0 {
             let mpsiz = match self.descriptor.max_packet_size {
                 8 => 0b11,
@@ -189,7 +189,7 @@ impl EndpointOut {
         }
     }
 
-    pub fn deconfigure(&self, _cs: CriticalSection<'_>, core_id: u32) {
+    pub fn deconfigure(&self, core_id: u32) {
         let regs = self.usb.endpoint_out(self.index() as usize);
 
         // GD32VF103 doesn't support endpoint deactivation after reset, so skip this.

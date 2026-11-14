@@ -43,6 +43,23 @@ pub unsafe trait UsbPeripheral: Send + Sync {
     /// AHB frequency in hertz
     fn ahb_frequency_hz(&self) -> u32;
 
+    /// Maximum elapsed time for one register wait, in microseconds.
+    const WAIT_TIMEOUT_US: u32;
+
+    /// Independent finite limit if the clock fails to advance.
+    const WAIT_POLL_LIMIT: u32;
+
+    /// Reads a monotonic clock which advances without USB or timer interrupts.
+    /// This must be bounded and must not block or panic.
+    fn now_us(&self) -> u64;
+
+    /// Permanently stops this peripheral after failure.
+    ///
+    /// This must be bounded, synchronous, and must not panic, wait, reenter this bus,
+    /// or access USB registers. It runs without the driver's critical section.
+    /// Holding the peripheral in its external reset is a suitable implementation.
+    fn abort(&self);
+
     /// Returns PHY type that should be used for USB peripheral
     fn phy_type(&self) -> PhyType {
         PhyType::InternalFullSpeed
